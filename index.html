@@ -87,6 +87,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 5px;
+            text-decoration: none; /* Add this to remove underline from links styled as buttons */
+            display: inline-block; /* Ensure button styling applies correctly to anchor tags */
         }
 
         .btn:hover {
@@ -307,6 +309,24 @@
             color: #4a5568;
             font-size: 0.9em;
         }
+        /* 新增页脚样式 */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: rgba(255,255,255,0.8);
+            width: 100%;
+        }
+        footer a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -324,7 +344,6 @@
         </p>
 
         <div class="game-grid">
-            <!-- 随机提问器 -->
             <div class="game-card">
                 <h3><span class="emoji">🎲</span>随机提问器</h3>
                 <p>随机选择学生回答问题，增加课堂参与度</p>
@@ -332,14 +351,12 @@
                 <div id="randomResult" style="margin-top: 15px; font-weight: bold; color: #667eea;"></div>
             </div>
 
-            <!-- 快速问答 -->
             <div class="game-card">
                 <h3><span class="emoji">⚡</span>快速问答</h3>
                 <p>测试学生对知识点的掌握程度</p>
                 <button class="btn" onclick="showQuiz()">开始问答</button>
             </div>
 
-            <!-- 幸运转盘 -->
             <div class="game-card">
                 <h3><span class="emoji">🎡</span>幸运转盘</h3>
                 <p>用转盘决定课堂活动或奖励</p>
@@ -347,21 +364,18 @@
                 <button class="btn" onclick="spinWheel()" id="spinBtn" style="display: none;">开始转动</button>
             </div>
 
-            <!-- 实时投票 -->
             <div class="game-card">
                 <h3><span class="emoji">📊</span>实时投票</h3>
                 <p>收集学生意见，增加互动参与</p>
                 <button class="btn" onclick="showVote()">发起投票</button>
             </div>
 
-            <!-- 知识竞赛 -->
             <div class="game-card">
                 <h3><span class="emoji">🏆</span>知识竞赛</h3>
                 <p>分组竞赛，激发学习热情</p>
                 <button class="btn" onclick="startCompetition()">开始竞赛</button>
             </div>
 
-            <!-- 创意表达 -->
             <div class="game-card">
                 <h3><span class="emoji">🎨</span>创意表达</h3>
                 <p>让学生用创意方式表达学习内容</p>
@@ -369,7 +383,6 @@
             </div>
         </div>
 
-        <!-- 问答容器 -->
         <div class="quiz-container" id="quizContainer">
             <h3>📚 快速问答时间</h3>
             <div class="quiz-question" id="quizQuestion"></div>
@@ -377,7 +390,6 @@
             <button class="btn" onclick="hideQuiz()">关闭问答</button>
         </div>
 
-        <!-- 转盘容器 -->
         <div class="wheel-container" id="wheelContainer">
             <h3 style="text-align: center;">🎡 幸运转盘</h3>
             <div class="wheel" id="wheel">
@@ -390,7 +402,6 @@
             </p>
         </div>
 
-        <!-- 投票容器 -->
         <div class="vote-container" id="voteContainer">
             <h3>📊 课堂实时投票</h3>
             <p>今天的课程难度如何？</p>
@@ -419,7 +430,6 @@
             <button class="btn" onclick="hideVote()" style="margin-top: 20px;">关闭投票</button>
         </div>
 
-        <!-- 统计面板 -->
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-number" id="participationCount">0</div>
@@ -441,6 +451,13 @@
     </div>
 
     <div class="celebration" id="celebration"></div>
+
+    <footer>
+        <p>&copy; 2023 课堂互动游戏平台. 版权所有.</p>
+        <p>
+            <a href="https://qwerty.kaiyi.cool/" target="_blank">访问 Kaiyi Cool 网站</a>
+        </p>
+    </footer>
 
     <script>
         let stats = {
