@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课堂互动游戏平台 🎯</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .game-card h3 {
+            color: #4a5568;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 1.5em;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .quiz-container, .wheel-container, .vote-container {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .quiz-question {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: #e6fffa;
+            border-color: #38b2ac;
+        }
+
+        .wheel {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff6b6b 0deg 72deg,
+                #4ecdc4 72deg 144deg,
+                #45b7d1 144deg 216deg,
+                #96ceb4 216deg 288deg,
+                #feca57 288deg 360deg
+            );
+            margin: 20px auto;
+            position: relative;
+            transition: transform 3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .wheel-pointer {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #333;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .energy-meter {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #96ceb4);
+            width: 0%;
+            transition: width 1s ease;
+            border-radius: 10px;
+        }
+
+        .vote-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .vote-option {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .vote-option:hover {
+            background: #e6fffa;
+            border-color: #38b2ac;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #feca57;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 课堂互动游戏平台</h1>
+            <p>让学习变得有趣，让课堂充满活力！</p>
+        </div>
+
+        <div class="energy-meter">
+            <div class="energy-fill" id="energyFill"></div>
+        </div>
+        <p style="text-align: center; color: white; margin-bottom: 30px;">
+            课堂活跃度: <span id="energyLevel">0</span>%
+        </p>
+
+        <div class="game-grid">
+            <!-- 随机提问器 -->
+            <div class="game-card">
+                <h3><span class="emoji">🎲</span>随机提问器</h3>
+                <p>随机选择学生回答问题，增加课堂参与度</p>
+                <button class="btn" onclick="randomQuestion()">开始随机提问</button>
+                <div id="randomResult" style="margin-top: 15px; font-weight: bold; color: #667eea;"></div>
+            </div>
+
+            <!-- 快速问答 -->
+            <div class="game-card">
+                <h3><span class="emoji">⚡</span>快速问答</h3>
+                <p>测试学生对知识点的掌握程度</p>
+                <button class="btn" onclick="showQuiz()">开始问答</button>
+            </div>
+
+            <!-- 幸运转盘 -->
+            <div class="game-card">
+                <h3><span class="emoji">🎡</span>幸运转盘</h3>
+                <p>用转盘决定课堂活动或奖励</p>
+                <button class="btn" onclick="showWheel()">显示转盘</button>
+                <button class="btn" onclick="spinWheel()" id="spinBtn" style="display: none;">开始转动</button>
+            </div>
+
+            <!-- 实时投票 -->
+            <div class="game-card">
+                <h3><span class="emoji">📊</span>实时投票</h3>
+                <p>收集学生意见，增加互动参与</p>
+                <button class="btn" onclick="showVote()">发起投票</button>
+            </div>
+
+            <!-- 知识竞赛 -->
+            <div class="game-card">
+                <h3><span class="emoji">🏆</span>知识竞赛</h3>
+                <p>分组竞赛，激发学习热情</p>
+                <button class="btn" onclick="startCompetition()">开始竞赛</button>
+            </div>
+
+            <!-- 创意表达 -->
+            <div class="game-card">
+                <h3><span class="emoji">🎨</span>创意表达</h3>
+                <p>让学生用创意方式表达学习内容</p>
+                <button class="btn" onclick="creativeActivity()">启动活动</button>
+            </div>
+        </div>
+
+        <!-- 问答容器 -->
+        <div class="quiz-container" id="quizContainer">
+            <h3>📚 快速问答时间</h3>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <button class="btn" onclick="hideQuiz()">关闭问答</button>
+        </div>
+
+        <!-- 转盘容器 -->
+        <div class="wheel-container" id="wheelContainer">
+            <h3 style="text-align: center;">🎡 幸运转盘</h3>
+            <div class="wheel" id="wheel">
+                <div class="wheel-pointer"></div>
+                <div class="wheel-center">GO!</div>
+            </div>
+            <p style="text-align: center; margin-top: 15px;">
+                <button class="btn" onclick="spinWheel()">转动转盘</button>
+                <button class="btn" onclick="hideWheel()">关闭转盘</button>
+            </p>
+        </div>
+
+        <!-- 投票容器 -->
+        <div class="vote-container" id="voteContainer">
+            <h3>📊 课堂实时投票</h3>
+            <p>今天的课程难度如何？</p>
+            <div class="vote-options">
+                <div class="vote-option" onclick="vote('easy')">
+                    <div style="font-size: 2em;">😊</div>
+                    <div>太简单了</div>
+                    <div id="voteEasy">0票</div>
+                </div>
+                <div class="vote-option" onclick="vote('good')">
+                    <div style="font-size: 2em;">👍</div>
+                    <div>刚刚好</div>
+                    <div id="voteGood">0票</div>
+                </div>
+                <div class="vote-option" onclick="vote('hard')">
+                    <div style="font-size: 2em;">😰</div>
+                    <div>有点难</div>
+                    <div id="voteHard">0票</div>
+                </div>
+                <div class="vote-option" onclick="vote('very-hard')">
+                    <div style="font-size: 2em;">😵</div>
+                    <div>太难了</div>
+                    <div id="voteVeryHard">0票</div>
+                </div>
+            </div>
+            <button class="btn" onclick="hideVote()" style="margin-top: 20px;">关闭投票</button>
+        </div>
+
+        <!-- 统计面板 -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="participationCount">0</div>
+                <div class="stat-label">参与次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctAnswers">0</div>
+                <div class="stat-label">正确答案</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalVotes">0</div>
+                <div class="stat-label">投票总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeDuration">0</div>
+                <div class="stat-label">活跃分钟</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        let stats = {
+            participation: 0,
+            correct: 0,
+            votes: 0,
+            startTime: Date.now()
+        };
+
+        let voteData = {
+            easy: 0,
+            good: 0,
+            hard: 0,
+            'very-hard': 0
+        };
+
+        const students = [
+            '小明', '小红', '小李', '小王', '小张', '小刘', '小陈', '小杨',
+            '小赵', '小孙', '小周', '小吴', '小郑', '小冯', '小何', '小高'
+        ];
+
+        const questions = [
+            {
+                question: "以下哪个不是Python的数据类型？",
+                options: ["列表 (list)", "元组 (tuple)", "数组 (array)", "字典 (dict)"],
+                correct: 2
+            },
+            {
+                question: "HTML的全称是什么？",
+                options: ["超文本标记语言", "高级文本语言", "超链接标记语言", "高级标记语言"],
+                correct: 0
+            },
+            {
+                question: "CSS中用于设置文字颜色的属性是？",
+                options: ["background-color", "color", "font-color", "text-color"],
+                correct: 1
+            }
+        ];
+
+        function updateEnergyLevel() {
+            const energyLevel = Math.min(100, stats.participation * 10 + stats.correct * 15 + stats.votes * 5);
+            document.getElementById('energyFill').style.width = energyLevel + '%';
+            document.getElementById('energyLevel').textContent = energyLevel;
+            
+            if (energyLevel > 80) {
+                document.getElementById('energyFill').classList.add('pulse');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('participationCount').textContent = stats.participation;
+            document.getElementById('correctAnswers').textContent = stats.correct;
+            document.getElementById('totalVotes').textContent = stats.votes;
+            document.getElementById('activeDuration').textContent = Math.floor((Date.now() - stats.startTime) / 60000);
+            updateEnergyLevel();
+        }
+
+        function randomQuestion() {
+            const randomStudent = students[Math.floor(Math.random() * students.length)];
+            const result = document.getElementById('randomResult');
+            result.innerHTML = `🎯 被选中的同学是: <strong>${randomStudent}</strong>`;
+            result.style.animation = 'none';
+            result.offsetHeight; // 触发重排
+            result.style.animation = 'fadeInUp 0.5s ease-out';
+            
+            stats.participation++;
+            updateStats();
+            createConfetti();
+        }
+
+        function showQuiz() {
+            const container = document.getElementById('quizContainer');
+            const randomQ = questions[Math.floor(Math.random() * questions.length)];
+            
+            document.getElementById('quizQuestion').textContent = randomQ.question;
+            
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            
+            randomQ.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => checkAnswer(index, randomQ.correct);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function checkAnswer(selected, correct) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach((option, index) => {
+                if (index === correct) {
+                    option.style.background = '#c6f6d5';
+                    option.style.borderColor = '#38a169';
+                } else if (index === selected && selected !== correct) {
+                    option.style.background = '#fed7d7';
+                    option.style.borderColor = '#e53e3e';
+                }
+                option.onclick = null;
+            });
+            
+            if (selected === correct) {
+                stats.correct++;
+                createConfetti();
+            }
+            stats.participation++;
+            updateStats();
+        }
+
+        function hideQuiz() {
+            document.getElementById('quizContainer').style.display = 'none';
+        }
+
+        function showWheel() {
+            document.getElementById('wheelContainer').style.display = 'block';
+            document.getElementById('wheelContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideWheel() {
+            document.getElementById('wheelContainer').style.display = 'none';
+        }
+
+        function spinWheel() {
+            const wheel = document.getElementById('wheel');
+            const randomDegree = Math.floor(Math.random() * 360) + 1800; // 至少转5圈
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
+            
+            setTimeout(() => {
+                const activities = ['小组讨论', '个人展示', '抢答时间', '休息5分钟', '知识竞赛'];
+                const finalDegree = randomDegree % 360;
+                const activityIndex = Math.floor(finalDegree / 72);
+                alert(`🎉 恭喜！活动是: ${activities[activityIndex]}`);
+                stats.participation++;
+                updateStats();
+                createConfetti();
+            }, 3000);
+        }
+
+        function showVote() {
+            document.getElementById('voteContainer').style.display = 'block';
+            document.getElementById('voteContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideVote() {
+            document.getElementById('voteContainer').style.display = 'none';
+        }
+
+        function vote(option) {
+            voteData[option]++;
+            stats.votes++;
+            
+            const elementId = {
+                'easy': 'voteEasy',
+                'good': 'voteGood',
+                'hard': 'voteHard',
+                'very-hard': 'voteVeryHard'
+            };
+            
+            document.getElementById(elementId[option]).textContent = voteData[option] + '票';
+            updateStats();
+        }
+
+        function startCompetition() {
+            alert('🏆 知识竞赛开始！\n\n规则：\n1. 分成4组进行竞赛\n2. 每组派代表抢答\n3. 答对加10分，答错扣5分\n4. 最高分组获得奖励！');
+            stats.participation++;
+            updateStats();
+        }
+
+        function creativeActivity() {
+            const activities = [
+                '用一句话总结今天学到的内容',
+                '画一个思维导图',
+                '编一个小故事来解释概念',
+                '用身体动作演示原理',
+                '创作一首关于今天内容的歌'
+            ];
+            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+            alert(`🎨 创意挑战：${randomActivity}`);
+            stats.participation++;
+            updateStats();
+        }
+
+        function createConfetti() {
+            const celebration = document.getElementById('celebration');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+            
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                celebration.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+
+        // 定期更新活跃时间
+        setInterval(updateStats, 60000);
+        
+        // 初始化统计
+        updateStats();
+    </script>
+</body>
+</html>
